@@ -1,0 +1,88 @@
+on:
+#  release:
+#    types: [created]
+  workflow_dispatch:
+
+name: Create Release (Obsolete)
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+    - name: Cache pip
+      uses: actions/cache@v5
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Cache PlatformIO
+      uses: actions/cache@v5
+      with:
+        path: ~/.platformio
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade platformio
+    - name: Enable ESP platforms from platformio_override-template.ini
+      run: |
+        sed 's/; user_setups\/esp/user_setups\/esp/g' platformio_override-template.ini > platformio_override.ini
+    - name: Enable Linux platform from platformio_override.ini
+      run: |
+        sed -i 's/; user_setups\/linux/user_setups\/linux/g' platformio_override.ini
+        mkdir -p .pio/libdeps/linux_sdl/paho/src
+    - name: Install SDL2 library
+      run: |
+        sudo apt-get update
+        sudo apt-get install libsdl2-dev
+    - name: List all files in current folder
+      run: |
+        ls -la
+    - name: Cat platformio_override.ini
+      run: |
+        cat platformio_override.ini
+    - name: Run PlatformIO
+      run: pio run -e lolin-d32-pro_ili9341
+    - name: Run PlatformIO
+      run: pio run -e az-touch-mod-esp32_ili9341_4MB -e az-touch-mod-esp32_ili9341_8MB
+    - name: Run PlatformIO
+      run: pio run -e makerfabs-tft35-cap_4MB -e makerfabs-tft35-cap_16MB
+    - name: Run PlatformIO
+      run: pio run -e yeacreate-nscreen32 -e
+    - name: Run PlatformIO
+      run: pio run -e d1-mini-esp32_ili9341
+    - name: Run PlatformIO
+      run: pio run -e esp32-touchdown -e freetouchdeck_4MB -e freetouchdeck_8MB
+    - name: Run PlatformIO
+      run: pio run -e huzzah32-featherwing-24 -e huzzah32-featherwing-35 -e huzzah32-featherwing-24-v2 -e huzzah32-featherwing-35-v2 -e huzzah32-v2-featherwing-24-v2 -e huzzah32-v2-featherwing-35-v2
+    - name: Run PlatformIO
+      run: pio run -e lanbon_l8
+    - name: Run PlatformIO
+      run: pio run -e wt32-sc01_4MB -e wt32-sc01_16MB
+    - name: Run PlatformIO
+      run: pio run -e m5stack-core2
+    - name: Upload output file
+      uses: actions/upload-artifact@v6
+      with:
+        name: openHASP firmware.zip
+        path: build_output/firmware/*.bin
+    - name: Create release and upload firmware
+      run: |
+        set -x
+        assets=()
+        for asset in build_output/firmware/*.bin; do
+          assets+=("-a" "$asset")
+        done
+        tag_name="${GITHUB_REF##*/}"
+        hub release edit "${assets[@]}" -m "$tag_name" "$tag_name"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
