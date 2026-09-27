@@ -1,6 +1,48 @@
 /* MIT License - Copyright (c) 2019-2024 Francis Van Roie
    For full license information read the LICENSE file in the project folder */
 
+#define TEMPORARY_I2C_SCANNER
+
+#if defined(TEMPORARY_I2C_SCANNER)
+
+#include <Arduino.h>
+#include <Wire.h>
+
+void setup()
+{
+    Serial.begin(115200);
+    delay(1500);
+
+    Serial.println("I2C scanner: SDA=33, SCL=32");
+    if(!Wire.begin(33, 32)) {
+        Serial.println("ERROR: I2C initialization failed");
+        return;
+    }
+}
+
+void loop()
+{
+    Serial.println("Scanning I2C bus...");
+    uint8_t found = 0;
+
+    for(uint8_t address = 1; address < 127; address++) {
+        Wire.beginTransmission(address);
+        uint8_t error = Wire.endTransmission();
+        if(error == 0) {
+            Serial.printf("I2C device found at 0x%02X\n", address);
+            found++;
+        }
+        delay(1);
+    }
+
+    if(found == 0) {
+        Serial.println("No I2C devices found");
+    }
+    delay(5000);
+}
+
+#else
+
 /*
 #ifdef CORE_DEBUG_LEVEL
 #undef CORE_DEBUG_LEVEL
@@ -288,3 +330,5 @@ IRAM_ATTR void loop()
     delay(2); // ms
 #endif
 }
+
+#endif
