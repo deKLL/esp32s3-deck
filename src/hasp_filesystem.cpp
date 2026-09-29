@@ -26,8 +26,8 @@
 extern const uint8_t PAGES_JSONL_START[] asm(QUOTE(PAGES_JSONL)"_start");
 extern const uint8_t PAGES_JSONL_END[] asm(QUOTE(PAGES_JSONL)"_end");
 #else
-extern const uint8_t PAGES_JSONL_START[] asm("_binary_data_pages_pages_jsonl_start");
-extern const uint8_t PAGES_JSONL_END[] asm("_binary_data_pages_pages_jsonl_end");
+extern const uint8_t PAGES_JSONL_START[] asm("_binary_data_pages_jsonl_start");
+extern const uint8_t PAGES_JSONL_END[] asm("_binary_data_pages_jsonl_end");
 #endif
 #endif
 

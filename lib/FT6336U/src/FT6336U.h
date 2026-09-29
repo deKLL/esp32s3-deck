@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include <Arduino.h>
 
-#define I2C_ADDR_FT6336U 0x48
+#define I2C_ADDR_FT6336U 0x38
 
 // Touch Parameter
 #define FT6336U_PRES_DOWN 0x2
